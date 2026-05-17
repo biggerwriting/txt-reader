@@ -115,9 +115,9 @@ export async function mountReader(
   contentArea.addEventListener('click', () => {
     barsVisible = !barsVisible
     topbar.style.opacity = barsVisible ? '1' : '0'
-    topbar.style.pointerEvents = barsVisible ? 'all' : 'none'
+    topbar.style.pointerEvents = barsVisible ? 'auto' : 'none'
     bottombar.style.opacity = barsVisible ? '1' : '0'
-    bottombar.style.pointerEvents = barsVisible ? 'all' : 'none'
+    bottombar.style.pointerEvents = barsVisible ? 'auto' : 'none'
   })
 
   // --- Swipe gestures ---
