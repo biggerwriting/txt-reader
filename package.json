@@ -24,6 +24,7 @@
     "vitest": "^4.1.6"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/preferences": "^8.0.1",
     "@capawesome/capacitor-file-picker": "^8.0.2"
