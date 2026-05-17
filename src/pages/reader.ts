@@ -151,12 +151,18 @@ export async function mountReader(
 
   // --- Swipe gestures ---
   let touchStartX = 0
-  contentArea.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX }, { passive: true })
+  let touchStartY = 0
+  contentArea.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX
+    touchStartY = e.touches[0].clientY
+  }, { passive: true })
   contentArea.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - touchStartX
-    if (Math.abs(dx) > 60) {
-      if (dx < 0) renderChapter(currentChapter + 1)  // left swipe = next
-      else renderChapter(currentChapter - 1)           // right swipe = prev
+    const dy = e.changedTouches[0].clientY - touchStartY
+    // Only trigger chapter change when horizontal movement dominates (ratio > 2:1)
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2) {
+      if (dx < 0) renderChapter(currentChapter + 1)
+      else renderChapter(currentChapter - 1)
     }
   })
 
