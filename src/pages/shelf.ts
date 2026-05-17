@@ -37,39 +37,6 @@ function showDeleteDialog(book: Book, onConfirm: () => void): void {
   })
 }
 
-async function importBook(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = '.txt'
-    input.onchange = async () => {
-      const file = input.files?.[0]
-      if (!file) { resolve(); return }
-      try {
-        const text = await file.text()
-        const chapters = parseChapters(text)
-        const book: Book = {
-          id: crypto.randomUUID(),
-          title: file.name.replace(/\.txt$/i, ''),
-          chapters,
-          fullText: text,
-          totalChars: text.length,
-          importedAt: Date.now(),
-          currentChapter: 0,
-          currentScrollY: 0,
-          readSeconds: 0,
-          lastReadAt: 0,
-        }
-        await storage.saveBook(book)
-        resolve()
-      } catch (e) {
-        reject(e)
-      }
-    }
-    input.click()
-  })
-}
-
 export async function mountShelf(container: HTMLElement, router: Router): Promise<void> {
   async function render(): Promise<void> {
     const books = await storage.listBooks()
@@ -78,7 +45,10 @@ export async function mountShelf(container: HTMLElement, router: Router): Promis
       <div class="page">
         <div class="topbar">
           <h1>我的书架</h1>
-          <button class="icon-btn" id="import-btn" title="导入">＋</button>
+          <label class="icon-btn" title="导入" style="cursor:pointer">
+            ＋
+            <input type="file" accept=".txt" id="file-input" style="display:none" />
+          </label>
         </div>
         <div class="scroll-list" id="book-list">
           ${books.length === 0 ? `
@@ -104,8 +74,25 @@ export async function mountShelf(container: HTMLElement, router: Router): Promis
       </div>
     `
 
-    container.querySelector('#import-btn')!.addEventListener('click', async () => {
-      await importBook()
+    const fileInput = container.querySelector<HTMLInputElement>('#file-input')!
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files?.[0]
+      if (!file) return
+      const text = await file.text()
+      const chapters = parseChapters(text)
+      const book: Book = {
+        id: crypto.randomUUID(),
+        title: file.name.replace(/\.txt$/i, ''),
+        chapters,
+        fullText: text,
+        totalChars: text.length,
+        importedAt: Date.now(),
+        currentChapter: 0,
+        currentScrollY: 0,
+        readSeconds: 0,
+        lastReadAt: 0,
+      }
+      await storage.saveBook(book)
       render()
     })
 
