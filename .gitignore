@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+
+# Capacitor
+android/
+ios/
+
+# Brainstorm mockups
+.superpowers/
