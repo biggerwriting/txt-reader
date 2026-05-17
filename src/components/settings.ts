@@ -73,6 +73,9 @@ export class SettingsSheet {
         e.stopPropagation()
         const id = (el as HTMLElement).dataset.id!
         await storage.deleteBookmark(id)
+        // Remove old DOM elements immediately before re-rendering
+        this.backdrop.remove()
+        this.sheet.remove()
         await this.open()
       })
     })
