@@ -23,11 +23,19 @@ describe('parseChapters', () => {
     expect(chapters[1].title).toBe('Chapter 1 Beginning')
   })
 
-  it('detects numeric list pattern', () => {
-    const text = '1、第一节\n内容\n2、第二节\n内容'
+  it('detects arabic numeral chapter: 第4章', () => {
+    const text = '第4章 出发\n正文内容\n第5章 到达\n正文内容'
     const chapters = parseChapters(text)
     expect(chapters).toHaveLength(2)
-    expect(chapters[0].title).toBe('1、第一节')
+    expect(chapters[0].title).toBe('第4章 出发')
+    expect(chapters[1].title).toBe('第5章 到达')
+  })
+
+  it('does not treat "1. " or "2. " list items as chapters', () => {
+    const text = '1. 苹果\n2. 香蕉\n3. 橙子'
+    const chapters = parseChapters(text)
+    // Should fall back to pages, not extract fake chapters
+    expect(chapters[0].title).toBe('第 1 页')
   })
 
   it('falls back to 2000-char pages when no pattern matches', () => {
