@@ -27,8 +27,10 @@ function formatDate(ts: number): string {
 }
 
 function formatProgress(book: Book): string {
-  if (!book.chapters.length) return '0%'
-  const pct = Math.round((book.currentChapter / book.chapters.length) * 100)
+  if (!book.totalChars) return '0%'
+  const ch = book.chapters[book.currentChapter]
+  if (!ch) return '0%'
+  const pct = Math.round((ch.offset + ch.length) / book.totalChars * 100)
   return `${pct}%`
 }
 

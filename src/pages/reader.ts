@@ -114,7 +114,8 @@ export async function mountReader(
     }
 
     chapterTitleEl.textContent = ch.title
-    const pct = Math.round(((currentChapter + 1) / book!.chapters.length) * 100)
+    const readChars = ch.offset + ch.length
+    const pct = Math.round(readChars / book!.totalChars * 100)
     progressFill.style.width = `${pct}%`
     progressText.textContent = `${pct}%`
   }
