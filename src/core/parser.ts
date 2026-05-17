@@ -2,7 +2,7 @@
 import type { Chapter } from '../types'
 
 const PATTERNS = [
-  /^第[零一二三四五六七八九十百千万\d]+[章节回]([\s　\u3000]|$)/,
+  /^第[零一二三四五六七八九十百千万\d]+[章节回]/,
   /^Chapter\s*\d+/i,
 ]
 

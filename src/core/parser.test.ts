@@ -31,6 +31,14 @@ describe('parseChapters', () => {
     expect(chapters[1].title).toBe('第5章 到达')
   })
 
+  it('detects chapter title with content immediately after 章: 第1章1', () => {
+    const text = '第1章1 开始\n正文内容\n第2章2 继续\n正文内容'
+    const chapters = parseChapters(text)
+    expect(chapters).toHaveLength(2)
+    expect(chapters[0].title).toBe('第1章1 开始')
+    expect(chapters[1].title).toBe('第2章2 继续')
+  })
+
   it('does not treat "1. " or "2. " list items as chapters', () => {
     const text = '1. 苹果\n2. 香蕉\n3. 橙子'
     const chapters = parseChapters(text)
@@ -62,11 +70,11 @@ describe('parseChapters', () => {
   })
 
   it('chapter offset + length covers correct text slice', () => {
-    const text = '第一章 开始\n第一章正文内容\n第二章 结束\n第二章正文内容'
+    const text = '第一章 开始\n这是正文内容\n第二章 结束\n这是第二章内容'
     const chapters = parseChapters(text)
     const slice = text.slice(chapters[0].offset, chapters[0].offset + chapters[0].length)
     expect(slice).toContain('第一章 开始')
-    expect(slice).toContain('第一章正文内容')
+    expect(slice).toContain('这是正文内容')
     expect(slice).not.toContain('第二章')
   })
 })
