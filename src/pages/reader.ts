@@ -40,7 +40,7 @@ export async function mountReader(
       </div>
 
       <div id="content-area" style="flex:1;overflow-y:auto;padding:16px;
-           line-height:1.8;-webkit-overflow-scrolling:touch"></div>
+           line-height:1.8;-webkit-overflow-scrolling:touch;word-break:break-all"></div>
 
       <div class="topbar" id="reader-bottombar"
            style="border-top:1px solid var(--border);border-bottom:none;
