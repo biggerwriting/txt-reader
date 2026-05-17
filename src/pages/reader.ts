@@ -20,6 +20,8 @@ export async function mountReader(
 
   let currentChapter = book.currentChapter
   let barsVisible = true
+  let isFirstRender = true
+  let unmounted = false
 
   // --- Render shell ---
   container.innerHTML = `
@@ -75,7 +77,12 @@ export async function mountReader(
       .filter(l => l.trim())
       .map(l => `<p style="margin-bottom:1em">${l.trim()}</p>`)
       .join('')
-    contentArea.scrollTop = 0
+    if (isFirstRender) {
+      contentArea.scrollTop = book!.currentScrollY
+      isFirstRender = false
+    } else {
+      contentArea.scrollTop = 0
+    }
 
     chapterTitleEl.textContent = ch.title
     const pct = Math.round(((currentChapter + 1) / book!.chapters.length) * 100)
@@ -93,6 +100,8 @@ export async function mountReader(
 
   // --- Persist on leave ---
   async function persist(): Promise<void> {
+    unmounted = true
+    document.removeEventListener('visibilitychange', onVisibilityChange)
     timer.stop()
     clearInterval(timerInterval)
     book!.currentChapter = currentChapter
@@ -108,6 +117,7 @@ export async function mountReader(
     topbar.style.opacity = barsVisible ? '1' : '0'
     topbar.style.pointerEvents = barsVisible ? 'all' : 'none'
     bottombar.style.opacity = barsVisible ? '1' : '0'
+    bottombar.style.pointerEvents = barsVisible ? 'all' : 'none'
   })
 
   // --- Swipe gestures ---
@@ -162,12 +172,14 @@ export async function mountReader(
   })
 
   // --- Visibility API: pause timer when app backgrounds ---
-  document.addEventListener('visibilitychange', async () => {
+  const onVisibilityChange = async () => {
+    if (unmounted) return
     if (document.hidden) {
       timer.stop()
       await storage.saveBook({ ...book!, readSeconds: timer.elapsed, lastReadAt: Date.now() })
     } else {
       timer.start()
     }
-  })
+  }
+  document.addEventListener('visibilitychange', onVisibilityChange)
 }
