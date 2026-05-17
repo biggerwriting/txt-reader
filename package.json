@@ -15,6 +15,7 @@
     "cap:build": "npm run build && npx cap sync"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@vitest/coverage-v8": "^4.1.6",
     "jsdom": "^29.1.1",
     "typescript": "~5.7.2",
@@ -22,8 +23,6 @@
     "vitest": "^4.1.6"
   },
   "dependencies": {
-    "@capacitor/app": "^8.1.0",
-    "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/preferences": "^8.0.1",
     "@capawesome/capacitor-file-picker": "^8.0.2"
