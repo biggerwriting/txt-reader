@@ -4,7 +4,7 @@ import type { Chapter } from '../types'
 const PATTERNS = [
   /^第[零一二三四五六七八九十百千万\d]+[章节回]([\s　\u3000]|$)/,
   /^Chapter\s*\d+/i,
-  /^[（(]?\d+[）)]?[、.。\s]/,
+  /^[（(]?\d+[）)]?[、.。]/,
 ]
 
 const FALLBACK_PAGE_SIZE = 2000
@@ -67,6 +67,20 @@ function extractByPattern(text: string, lines: string[], pattern: RegExp): Chapt
     })
   }
 
+  // Insert synthetic 前言 chapter for content before the first detected header
+  if (chapters.length > 0 && chapters[0].offset > 0) {
+    const preambleLength = chapters[0].offset
+    for (const ch of chapters) {
+      ch.index += 1
+    }
+    chapters.unshift({
+      index: 0,
+      title: '前言',
+      offset: 0,
+      length: preambleLength,
+    })
+  }
+
   return chapters
 }
 
@@ -77,9 +91,10 @@ function fallbackPages(text: string): Chapter[] {
 
   while (offset < text.length) {
     const length = Math.min(FALLBACK_PAGE_SIZE, text.length - offset)
+    const pageNum = index + 1
     chapters.push({
       index: index++,
-      title: `第 ${index} 页`,
+      title: `第 ${pageNum} 页`,
       offset,
       length,
     })
