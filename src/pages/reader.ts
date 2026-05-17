@@ -72,11 +72,39 @@ export async function mountReader(
     currentChapter = Math.max(0, Math.min(index, book!.chapters.length - 1))
     const ch = book!.chapters[currentChapter]
     const text = book!.fullText.slice(ch.offset, ch.offset + ch.length)
+    const total = book!.chapters.length
+    const hasPrev = currentChapter > 0
+    const hasNext = currentChapter < total - 1
+
     contentArea.innerHTML = text
       .split('\n')
       .filter(l => l.trim())
       .map(l => `<p style="margin-bottom:1em">${l.trim()}</p>`)
-      .join('')
+      .join('') + `
+      <div style="display:flex;justify-content:space-between;gap:12px;
+                  margin-top:32px;padding-top:16px;border-top:1px solid var(--border)">
+        <button id="prev-chapter-btn"
+          style="flex:1;padding:12px;border:1px solid var(--border);border-radius:var(--radius);
+                 background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;
+                 cursor:pointer;${hasPrev ? '' : 'opacity:0;pointer-events:none'}">
+          ← 上一章
+        </button>
+        <button id="next-chapter-btn"
+          style="flex:1;padding:12px;border:1px solid var(--border);border-radius:var(--radius);
+                 background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;
+                 cursor:pointer;${hasNext ? '' : 'opacity:0;pointer-events:none'}">
+          下一章 →
+        </button>
+      </div>`
+
+    contentArea.querySelector('#prev-chapter-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation()
+      renderChapter(currentChapter - 1)
+    })
+    contentArea.querySelector('#next-chapter-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation()
+      renderChapter(currentChapter + 1)
+    })
     if (isFirstRender) {
       contentArea.scrollTop = book!.currentScrollY
       isFirstRender = false
