@@ -74,4 +74,15 @@ describe('Storage', () => {
     const list = await storage.getBookmarks('b1')
     expect(list).toHaveLength(0)
   })
+
+  it('deletes bookmarks when book is deleted', async () => {
+    await storage.saveBook(makeBook('b1'))
+    await storage.saveBookmark({
+      id: 'bm1', bookId: 'b1', chapterIndex: 0,
+      chapterTitle: '第一章', createdAt: Date.now(),
+    })
+    await storage.deleteBook('b1')
+    const bms = await storage.getBookmarks('b1')
+    expect(bms).toHaveLength(0)
+  })
 })

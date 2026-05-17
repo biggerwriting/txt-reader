@@ -32,8 +32,11 @@ function tx<T>(
     const t = db.transaction(store, mode)
     const s = t.objectStore(store)
     const req = fn(s)
-    req.onsuccess = () => resolve(req.result)
+    let result: T
+    req.onsuccess = () => { result = req.result }
     req.onerror = () => reject(req.error)
+    t.oncomplete = () => resolve(result)
+    t.onerror = () => reject(t.error)
   })
 }
 
@@ -59,12 +62,19 @@ export class Storage {
 
   async deleteBook(id: string): Promise<void> {
     const db = await this.dbPromise
-    await tx(db, 'books', 'readwrite', s => s.delete(id))
-    // Also delete bookmarks for this book
-    const bms = await this.getBookmarks(id)
-    for (const bm of bms) {
-      await this.deleteBookmark(bm.id)
-    }
+    return new Promise((resolve, reject) => {
+      const t = db.transaction(['books', 'bookmarks'], 'readwrite')
+      t.objectStore('books').delete(id)
+      const bmIndex = t.objectStore('bookmarks').index('bookId')
+      const req = bmIndex.getAllKeys(id)
+      req.onsuccess = () => {
+        for (const key of req.result as IDBValidKey[]) {
+          t.objectStore('bookmarks').delete(key)
+        }
+      }
+      t.oncomplete = () => resolve()
+      t.onerror = () => reject(t.error)
+    })
   }
 
   async saveBookmark(bookmark: Bookmark): Promise<void> {
