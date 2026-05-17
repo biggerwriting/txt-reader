@@ -4,6 +4,7 @@ import { ReadingTimer } from '../core/timer'
 import { loadPrefs } from '../core/prefs'
 import { TocDrawer } from '../components/toc'
 import { SettingsSheet } from '../components/settings'
+import { uuid } from '../types'
 import type { Book, Bookmark } from '../types'
 import type { Router } from '../router'
 
@@ -175,7 +176,7 @@ export async function mountReader(
   container.querySelector('#bookmark-btn')!.addEventListener('click', async () => {
     const ch = book!.chapters[currentChapter]
     const bm: Bookmark = {
-      id: crypto.randomUUID(),
+      id: uuid(),
       bookId: book!.id,
       chapterIndex: currentChapter,
       chapterTitle: ch.title,

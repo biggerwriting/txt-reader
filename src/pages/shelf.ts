@@ -1,6 +1,7 @@
 // src/pages/shelf.ts
 import { storage } from '../core/storage'
 import { parseChapters } from '../core/parser'
+import { uuid } from '../types'
 import type { Book } from '../types'
 import type { Router } from '../router'
 
@@ -107,7 +108,7 @@ export async function mountShelf(container: HTMLElement, router: Router): Promis
 
         const chapters = parseChapters(text)
         const book: Book = {
-          id: crypto.randomUUID(),
+          id: uuid(),
           title: file.name.replace(/\.txt$/i, ''),
           chapters,
           fullText: text,
