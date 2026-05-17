@@ -17,6 +17,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.3.4",
     "@vitest/coverage-v8": "^4.1.6",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
     "typescript": "~5.7.2",
     "vite": "^6.3.5",
