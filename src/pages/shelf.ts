@@ -4,6 +4,21 @@ import { parseChapters } from '../core/parser'
 import type { Book } from '../types'
 import type { Router } from '../router'
 
+function readFileWithEncoding(file: File, encoding: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error(`读取文件失败 (${encoding})`))
+    reader.readAsText(file, encoding)
+  })
+}
+
+function isGarbled(text: string): boolean {
+  // U+FFFD is the Unicode replacement character — appears when bytes can't be decoded
+  const replacements = (text.match(/\uFFFD/g) ?? []).length
+  return replacements > 10 || replacements / text.length > 0.01
+}
+
 function formatDate(ts: number): string {
   if (!ts) return '未读过'
   const d = new Date(ts)
@@ -78,22 +93,37 @@ export async function mountShelf(container: HTMLElement, router: Router): Promis
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files?.[0]
       if (!file) return
-      const text = await file.text()
-      const chapters = parseChapters(text)
-      const book: Book = {
-        id: crypto.randomUUID(),
-        title: file.name.replace(/\.txt$/i, ''),
-        chapters,
-        fullText: text,
-        totalChars: text.length,
-        importedAt: Date.now(),
-        currentChapter: 0,
-        currentScrollY: 0,
-        readSeconds: 0,
-        lastReadAt: 0,
+
+      // Show loading state
+      const importLabel = container.querySelector<HTMLElement>('label[title="导入"]')!
+      importLabel.textContent = '…'
+
+      try {
+        // Try UTF-8 first; if result looks garbled (high ratio of replacement chars), retry as GBK
+        let text = await readFileWithEncoding(file, 'UTF-8')
+        if (isGarbled(text)) {
+          text = await readFileWithEncoding(file, 'GBK')
+        }
+
+        const chapters = parseChapters(text)
+        const book: Book = {
+          id: crypto.randomUUID(),
+          title: file.name.replace(/\.txt$/i, ''),
+          chapters,
+          fullText: text,
+          totalChars: text.length,
+          importedAt: Date.now(),
+          currentChapter: 0,
+          currentScrollY: 0,
+          readSeconds: 0,
+          lastReadAt: 0,
+        }
+        await storage.saveBook(book)
+        render()
+      } catch (e) {
+        importLabel.textContent = '＋'
+        alert(`导入失败：${e instanceof Error ? e.message : String(e)}`)
       }
-      await storage.saveBook(book)
-      render()
     })
 
     let pressTimer: ReturnType<typeof setTimeout>
