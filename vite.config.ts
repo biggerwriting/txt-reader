@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  base: '/txt-reader/',
   server: {
     host: '0.0.0.0',  // 监听所有网络接口，局域网可访问
     port: 5173,
