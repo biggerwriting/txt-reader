@@ -107,8 +107,10 @@ export async function mountReader(
       renderChapter(currentChapter + 1)
     })
     if (isFirstRender) {
-      contentArea.scrollTop = book!.currentScrollY
       isFirstRender = false
+      requestAnimationFrame(() => {
+        contentArea.scrollTop = book!.currentScrollY
+      })
     } else {
       contentArea.scrollTop = 0
     }
