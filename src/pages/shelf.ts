@@ -4,6 +4,7 @@ import { parseChapters } from '../core/parser'
 import { uuid } from '../types'
 import type { Book } from '../types'
 import type { Router } from '../router'
+import { ReadingTimer } from '../core/timer'
 
 function readFileWithEncoding(file: File, encoding: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -82,6 +83,7 @@ export async function mountShelf(container: HTMLElement, router: Router): Promis
                 <span>${b.chapters.length} 章</span>
                 <span>进度 ${formatProgress(b)}</span>
                 <span>上次 ${formatDate(b.lastReadAt)}</span>
+                ${b.readSeconds > 0 ? `<span>已读 ${ReadingTimer.format(b.readSeconds)}</span>` : ''}
               </div>
               <div class="progress-bar">
                 <div class="progress-bar-fill" style="width:${formatProgress(b)}"></div>
