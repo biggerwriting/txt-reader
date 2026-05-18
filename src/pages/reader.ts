@@ -27,7 +27,7 @@ export async function mountReader(
   // --- Render shell ---
   container.innerHTML = `
     <div class="page" id="reader-page" style="font-size:${prefs.fontSize}px">
-      <div class="topbar" id="reader-topbar" style="transition:opacity 0.2s">
+      <div class="topbar" id="reader-topbar">
         <button class="icon-btn" id="back-btn">←</button>
         <span id="chapter-title" style="font-size:14px;flex:1;text-align:center;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 8px">
@@ -45,7 +45,7 @@ export async function mountReader(
 
       <div class="topbar" id="reader-bottombar"
            style="border-top:1px solid var(--border);border-bottom:none;
-                  flex-direction:column;gap:6px;padding:10px 16px;transition:opacity 0.2s">
+                  flex-direction:column;gap:6px;padding:10px 16px">
         <div style="display:flex;align-items:center;gap:10px">
           <div class="progress-bar" style="flex:1">
             <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
@@ -157,10 +157,8 @@ export async function mountReader(
   // --- Toggle bars ---
   contentArea.addEventListener('click', () => {
     barsVisible = !barsVisible
-    topbar.style.opacity = barsVisible ? '1' : '0'
-    topbar.style.pointerEvents = barsVisible ? 'auto' : 'none'
-    bottombar.style.opacity = barsVisible ? '1' : '0'
-    bottombar.style.pointerEvents = barsVisible ? 'auto' : 'none'
+    topbar.classList.toggle('hidden', !barsVisible)
+    bottombar.classList.toggle('hidden', !barsVisible)
   })
 
   // --- Swipe gestures ---
