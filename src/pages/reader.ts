@@ -132,17 +132,26 @@ export async function mountReader(
     timeDisplay.textContent = ReadingTimer.format(timer.elapsed)
   }, 10000)
 
+  const autoSaveInterval = setInterval(() => {
+    if (!unmounted) saveProgress()
+  }, 30_000)
+
   // --- Persist on leave ---
-  async function persist(): Promise<void> {
-    unmounted = true
-    document.removeEventListener('visibilitychange', onVisibilityChange)
-    timer.stop()
-    clearInterval(timerInterval)
+  async function saveProgress(): Promise<void> {
     book!.currentChapter = currentChapter
     book!.currentScrollY = contentArea.scrollTop
     book!.readSeconds = timer.elapsed
     book!.lastReadAt = Date.now()
     await storage.saveBook(book!)
+  }
+
+  async function persist(): Promise<void> {
+    unmounted = true
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+    timer.stop()
+    clearInterval(timerInterval)
+    clearInterval(autoSaveInterval)
+    await saveProgress()
   }
 
   // --- Toggle bars ---
@@ -216,7 +225,7 @@ export async function mountReader(
     if (unmounted) return
     if (document.hidden) {
       timer.stop()
-      await storage.saveBook({ ...book!, readSeconds: timer.elapsed, lastReadAt: Date.now() })
+      await saveProgress()
     } else {
       timer.start()
     }
