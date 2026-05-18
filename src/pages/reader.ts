@@ -108,7 +108,9 @@ export async function mountReader(
     })
     if (isFirstRender) {
       isFirstRender = false
+      // Defer until after layout so scrollTop takes effect (scrollHeight is 0 before paint)
       requestAnimationFrame(() => {
+        if (unmounted) return
         contentArea.scrollTop = book!.currentScrollY
       })
     } else {
