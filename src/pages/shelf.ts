@@ -59,15 +59,21 @@ function showDeleteDialog(book: Book, onConfirm: () => void): void {
 export async function mountShelf(container: HTMLElement, router: Router): Promise<void> {
   async function render(): Promise<void> {
     const books = await storage.listBooks()
+    const totalReadSeconds = books.reduce((sum, b) => sum + b.readSeconds, 0)
 
     container.innerHTML = `
       <div class="page">
-        <div class="topbar">
-          <h1>我的书架</h1>
+        <div class="topbar" style="flex-wrap:wrap;row-gap:0">
+          <h1 style="flex:1">我的书架</h1>
           <label class="icon-btn" title="导入" style="cursor:pointer">
             ＋
             <input type="file" accept=".txt" id="file-input" style="display:none" />
           </label>
+          ${books.length > 0 ? `
+            <div style="width:100%;font-size:12px;color:var(--text-muted);padding:0 0 6px 0">
+              累计阅读 ${ReadingTimer.format(totalReadSeconds)}
+            </div>
+          ` : ''}
         </div>
         <div class="scroll-list" id="book-list">
           ${books.length === 0 ? `
