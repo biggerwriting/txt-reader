@@ -82,6 +82,12 @@ export async function mountReader(
 
   // --- Render chapter ---
   function renderChapter(index: number): void {
+    // Save departing chapter's scroll before switching (skip on first render — DOM not yet laid out)
+    if (!isFirstRender) {
+      if (!book!.chapterScrollPositions) book!.chapterScrollPositions = {}
+      book!.chapterScrollPositions[currentChapter] = contentArea.scrollTop
+    }
+
     currentChapter = Math.max(0, Math.min(index, book!.chapters.length - 1))
     const ch = book!.chapters[currentChapter]
     const text = book!.fullText.slice(ch.offset, ch.offset + ch.length)
@@ -118,22 +124,24 @@ export async function mountReader(
       e.stopPropagation()
       renderChapter(currentChapter + 1)
     })
-    if (isFirstRender) {
-      isFirstRender = false
-      // Defer until after layout so scrollTop takes effect (scrollHeight is 0 before paint)
-      requestAnimationFrame(() => {
-        if (unmounted) return
-        contentArea.scrollTop = book!.currentScrollY
-      })
-    } else {
-      contentArea.scrollTop = 0
-    }
+
+    // Restore this chapter's saved scroll position (0 if never visited)
+    const savedScroll = book!.chapterScrollPositions?.[currentChapter] ?? 0
+    if (isFirstRender) isFirstRender = false
+    requestAnimationFrame(() => {
+      if (unmounted) return
+      contentArea.scrollTop = savedScroll
+    })
 
     chapterTitleEl.textContent = ch.title
     const readChars = ch.offset + ch.length
     const pct = Math.round(readChars / book!.totalChars * 100)
     progressFill.style.width = `${pct}%`
     progressText.textContent = `${pct}%`
+    prevChapBarBtn.style.opacity = hasPrev ? '1' : '0.3'
+    prevChapBarBtn.style.pointerEvents = hasPrev ? '' : 'none'
+    nextChapBarBtn.style.opacity = hasNext ? '1' : '0.3'
+    nextChapBarBtn.style.pointerEvents = hasNext ? '' : 'none'
   }
 
   renderChapter(currentChapter)
@@ -152,6 +160,8 @@ export async function mountReader(
   async function saveProgress(): Promise<void> {
     book!.currentChapter = currentChapter
     book!.currentScrollY = contentArea.scrollTop
+    book!.chapterScrollPositions = book!.chapterScrollPositions ?? {}
+    book!.chapterScrollPositions[currentChapter] = contentArea.scrollTop
     book!.readSeconds = timer.elapsed
     book!.lastReadAt = Date.now()
     await storage.saveBook(book!)
