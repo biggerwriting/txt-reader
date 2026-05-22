@@ -186,7 +186,7 @@ export async function mountReader(
 
   // --- TOC ---
   container.querySelector('#toc-btn')!.addEventListener('click', () => {
-    const toc = new TocDrawer(book!, (index) => renderChapter(index))
+    const toc = new TocDrawer(book!, currentChapter, (index) => renderChapter(index))
     toc.open()
   })
 

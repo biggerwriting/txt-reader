@@ -7,6 +7,7 @@ export class TocDrawer {
 
   constructor(
     private book: Book,
+    private currentChapter: number,
     private onSelect: (chapterIndex: number) => void
   ) {
     this.backdrop = document.createElement('div')
@@ -45,6 +46,13 @@ export class TocDrawer {
     requestAnimationFrame(() => {
       this.backdrop.classList.add('visible')
       this.drawer.classList.add('open')
+      const active = this.drawer.querySelector<HTMLElement>(
+        `[data-index="${this.currentChapter}"]`
+      )
+      if (active) {
+        active.scrollIntoView({ block: 'center', behavior: 'instant' })
+        active.classList.add('active')
+      }
     })
   }
 
