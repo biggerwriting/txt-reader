@@ -85,4 +85,12 @@ describe('Storage', () => {
     const bms = await storage.getBookmarks('b1')
     expect(bms).toHaveLength(0)
   })
+
+  it('preserves chapterScrollPositions across save/load', async () => {
+    const book = makeBook('b-scroll')
+    book.chapterScrollPositions = { 0: 150, 1: 320 }
+    await storage.saveBook(book)
+    const loaded = await storage.getBook('b-scroll')
+    expect(loaded?.chapterScrollPositions).toEqual({ 0: 150, 1: 320 })
+  })
 })

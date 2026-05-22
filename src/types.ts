@@ -27,6 +27,7 @@ export interface Book {
   importedAt: number
   currentChapter: number
   currentScrollY: number
+  chapterScrollPositions?: Record<number, number>
   readSeconds: number
   lastReadAt: number
 }
