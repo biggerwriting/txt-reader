@@ -46,6 +46,16 @@ export async function mountReader(
       <div class="topbar" id="reader-bottombar"
            style="border-top:1px solid var(--border);border-bottom:none;
                   flex-direction:column;gap:6px;padding:10px 16px">
+        <div style="display:flex;gap:8px;width:100%">
+          <button id="prev-chap-bar-btn"
+            style="flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius);
+                   background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;
+                   cursor:pointer">← 上一章</button>
+          <button id="next-chap-bar-btn"
+            style="flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius);
+                   background:var(--surface);color:var(--text);font-size:13px;font-family:inherit;
+                   cursor:pointer">下一章 →</button>
+        </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="progress-bar" style="flex:1">
             <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
@@ -67,6 +77,8 @@ export async function mountReader(
   const topbar = container.querySelector<HTMLElement>('#reader-topbar')!
   const bottombar = container.querySelector<HTMLElement>('#reader-bottombar')!
   const page = container.querySelector<HTMLElement>('#reader-page')!
+  const prevChapBarBtn = container.querySelector<HTMLButtonElement>('#prev-chap-bar-btn')!
+  const nextChapBarBtn = container.querySelector<HTMLButtonElement>('#next-chap-bar-btn')!
 
   // --- Render chapter ---
   function renderChapter(index: number): void {
@@ -172,21 +184,14 @@ export async function mountReader(
     }
   })
 
-  // --- Swipe gestures ---
-  let touchStartX = 0
-  let touchStartY = 0
-  contentArea.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX
-    touchStartY = e.touches[0].clientY
-  }, { passive: true })
-  contentArea.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchStartX
-    const dy = e.changedTouches[0].clientY - touchStartY
-    // Only trigger chapter change when horizontal movement dominates (ratio > 2:1)
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2) {
-      if (dx < 0) renderChapter(currentChapter + 1)
-      else renderChapter(currentChapter - 1)
-    }
+  // --- Bottombar chapter nav ---
+  prevChapBarBtn.addEventListener('click', (e) => {
+    e.stopPropagation()
+    renderChapter(currentChapter - 1)
+  })
+  nextChapBarBtn.addEventListener('click', (e) => {
+    e.stopPropagation()
+    renderChapter(currentChapter + 1)
   })
 
   // --- Back ---
