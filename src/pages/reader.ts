@@ -156,9 +156,20 @@ export async function mountReader(
 
   // --- Toggle bars ---
   contentArea.addEventListener('click', () => {
-    barsVisible = !barsVisible
-    topbar.classList.toggle('hidden', !barsVisible)
-    bottombar.classList.toggle('hidden', !barsVisible)
+    if (barsVisible) {
+      const topH = topbar.offsetHeight
+      barsVisible = false
+      topbar.classList.add('hidden')
+      bottombar.classList.add('hidden')
+      // content-area top edge moves up by topH; scroll down to compensate
+      contentArea.scrollTop += topH
+    } else {
+      barsVisible = true
+      topbar.classList.remove('hidden')
+      bottombar.classList.remove('hidden')
+      // topbar reappears; scroll up by its restored height
+      contentArea.scrollTop -= topbar.offsetHeight
+    }
   })
 
   // --- Swipe gestures ---
