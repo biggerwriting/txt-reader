@@ -183,14 +183,14 @@ export async function mountReader(
       barsVisible = false
       topbar.classList.add('hidden')
       bottombar.classList.add('hidden')
-      // content-area top edge moves up by topH; scroll down to compensate
-      contentArea.scrollTop += topH
+      // content-area top edge moves up by topH; pull content up to stay at same visual position
+      contentArea.scrollTop -= topH
     } else {
       barsVisible = true
       topbar.classList.remove('hidden')
       bottombar.classList.remove('hidden')
-      // topbar reappears; scroll up by its restored height
-      contentArea.scrollTop -= topbar.offsetHeight
+      // topbar reappears; push content down to stay at same visual position
+      contentArea.scrollTop += topbar.offsetHeight
     }
   })
 
