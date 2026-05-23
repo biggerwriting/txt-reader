@@ -41,8 +41,11 @@ export class SettingsSheet {
           : bookmarks.map(bm => `
             <div style="display:flex;align-items:center;justify-content:space-between;
                         padding:10px 0;border-bottom:1px solid var(--border)">
-              <span class="bm-jump" data-index="${bm.chapterIndex}"
-                    style="cursor:pointer;font-size:14px;flex:1">${bm.chapterTitle}</span>
+              <div class="bm-jump" data-index="${bm.chapterIndex}"
+                   style="cursor:pointer;flex:1;min-width:0">
+                <div style="font-size:14px">${bm.chapterTitle}</div>
+                ${bm.excerpt ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">${bm.excerpt}…</div>` : ''}
+              </div>
               <button class="icon-btn bm-delete" data-id="${bm.id}"
                       style="font-size:14px;color:var(--text-muted)">✕</button>
             </div>

@@ -37,6 +37,7 @@ export interface Bookmark {
   bookId: string
   chapterIndex: number
   chapterTitle: string
+  excerpt?: string
   createdAt: number
 }
 

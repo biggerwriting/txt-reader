@@ -26,8 +26,8 @@ export async function mountReader(
 
   // --- Render shell ---
   container.innerHTML = `
-    <div class="page" id="reader-page" style="font-size:${prefs.fontSize}px">
-      <div class="topbar" id="reader-topbar">
+    <div class="page" id="reader-page" style="font-size:${prefs.fontSize}px;position:relative">
+      <div class="topbar" id="reader-topbar" style="position:absolute;top:0;left:0;right:0;z-index:10">
         <button class="icon-btn" id="back-btn">←</button>
         <span id="chapter-title" style="font-size:14px;flex:1;text-align:center;
               overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 8px">
@@ -40,11 +40,12 @@ export async function mountReader(
         </div>
       </div>
 
-      <div id="content-area" style="flex:1;overflow-y:auto;padding:16px;
+      <div id="content-area" style="position:absolute;inset:0;overflow-y:auto;padding:16px;
            line-height:1.8;-webkit-overflow-scrolling:touch;word-break:break-all"></div>
 
       <div class="topbar" id="reader-bottombar"
-           style="border-top:1px solid var(--border);border-bottom:none;
+           style="position:absolute;bottom:0;left:0;right:0;z-index:10;
+                  border-top:1px solid var(--border);border-bottom:none;
                   flex-direction:column;gap:6px;padding:10px 16px">
         <div style="display:flex;gap:8px;width:100%">
           <button id="prev-chap-bar-btn"
@@ -61,9 +62,9 @@ export async function mountReader(
             <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
           </div>
           <span id="progress-text" style="font-size:12px;color:var(--text-muted);min-width:36px;text-align:right">0%</span>
-        </div>
-        <div style="font-size:12px;color:var(--text-muted);text-align:right" id="time-display">
-          ${ReadingTimer.format(book.readSeconds)}
+          <span id="time-display" style="font-size:12px;color:var(--text-muted);white-space:nowrap">
+            ${ReadingTimer.format(book.readSeconds)}
+          </span>
         </div>
       </div>
     </div>
@@ -178,20 +179,9 @@ export async function mountReader(
 
   // --- Toggle bars ---
   contentArea.addEventListener('click', () => {
-    if (barsVisible) {
-      const topH = topbar.offsetHeight
-      barsVisible = false
-      topbar.classList.add('hidden')
-      bottombar.classList.add('hidden')
-      // content-area top edge moves up by topH; pull content up to stay at same visual position
-      contentArea.scrollTop -= topH
-    } else {
-      barsVisible = true
-      topbar.classList.remove('hidden')
-      bottombar.classList.remove('hidden')
-      // topbar reappears; push content down to stay at same visual position
-      contentArea.scrollTop += topbar.offsetHeight
-    }
+    barsVisible = !barsVisible
+    topbar.classList.toggle('hidden', !barsVisible)
+    bottombar.classList.toggle('hidden', !barsVisible)
   })
 
   // --- Bottombar chapter nav ---
@@ -219,15 +209,30 @@ export async function mountReader(
   // --- Bookmark ---
   container.querySelector('#bookmark-btn')!.addEventListener('click', async () => {
     const ch = book!.chapters[currentChapter]
-    const bm: Bookmark = {
-      id: uuid(),
-      bookId: book!.id,
-      chapterIndex: currentChapter,
-      chapterTitle: ch.title,
-      createdAt: Date.now(),
+    // Find first paragraph at least partially visible at current scroll position
+    let excerpt = ''
+    for (const p of contentArea.querySelectorAll('p')) {
+      const el = p as HTMLElement
+      if (el.offsetTop + el.offsetHeight > contentArea.scrollTop) {
+        excerpt = el.textContent?.trim().slice(0, 7) ?? ''
+        break
+      }
     }
-    await storage.saveBookmark(bm)
-    // Brief visual feedback
+    const existing = await storage.getBookmarks(book!.id)
+    const isDuplicate = existing.some(
+      b => b.chapterIndex === currentChapter && b.excerpt === (excerpt || undefined)
+    )
+    if (!isDuplicate) {
+      const bm: Bookmark = {
+        id: uuid(),
+        bookId: book!.id,
+        chapterIndex: currentChapter,
+        chapterTitle: ch.title,
+        excerpt: excerpt || undefined,
+        createdAt: Date.now(),
+      }
+      await storage.saveBookmark(bm)
+    }
     const btn = container.querySelector<HTMLElement>('#bookmark-btn')!
     const orig = btn.textContent
     btn.textContent = '✓'
